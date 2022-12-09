@@ -41,10 +41,10 @@ export default (lines: string[]) => {
   const instructions = parseInstructions(instructionLines);
 
   instructions.forEach((instruction) => {
-    const s = instruction.source - 1
-    const d = instruction.destination - 1
-    stacks[d] = [...stacks[d], ...stacks[s].slice(-1 * instruction.count)]
-    stacks[s] = stacks[s].slice(0, -1 * instruction.count)
+    const s = instruction.source - 1;
+    const d = instruction.destination - 1;
+    stacks[d] = [...stacks[d], ...stacks[s].slice(-1 * instruction.count)];
+    stacks[s] = stacks[s].slice(0, -1 * instruction.count);
   });
 
   const result = stacks.map((stack) => stack.pop()).join("");
