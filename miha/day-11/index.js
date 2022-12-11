@@ -18,9 +18,9 @@ function getInitialMonkeys() {
         items: lines[1]
           .split(": ")[1]
           .split(", ")
-          .map((n) => BigInt(n)),
+          .map((n) => Number(n)),
         op: lines[2].split(": ")[1],
-        test_div: BigInt(lines[3].split("divisible by ")[1]),
+        test_div: Number(lines[3].split("divisible by ")[1]),
         test_true: Number(lines[4].split("throw to monkey ")[1]),
         test_false: Number(lines[5].split("throw to monkey ")[1]),
         inspections: 0,
@@ -30,24 +30,32 @@ function getInitialMonkeys() {
 
 const monkeys = getInitialMonkeys();
 
+// common multiple
+const lcm = monkeys
+  .map((m) => m.test_div)
+  .reduce((prev, curr) => prev * curr, 1);
+
 function evalOp(old, op) {
   var new_;
-  eval(op.replaceAll("new", "new_").replace(/(\d+)/g, "$1n"));
+  eval(op.replaceAll("new", "new_"));
   return new_;
 }
 
 function completeRound(monkeys, divideWorry) {
   for (const monkey of monkeys) {
-    monkey.items = monkey.items.map((item) => evalOp(item, monkey.op));
     if (divideWorry) {
-      monkey.items = monkey.items.map((item) => item / 3n);
+      monkey.items = monkey.items.map((item) => evalOp(item, monkey.op));
+      monkey.items = monkey.items.map((item) => Math.floor(item / 3));
+    } else {
+      monkey.items = monkey.items.map((item) => evalOp(item, monkey.op));
+      monkey.items = monkey.items.map((item) => Math.floor(item % lcm));
     }
 
-    // monkey.inspections += BigInt(monkey.items.length);
     monkey.inspections += monkey.items.length;
 
-    for (const item of monkey.items) {
-      if (item % monkey.test_div === 0n) {
+    for (let i = 0; i < monkey.items.length; i++) {
+      const item = monkey.items[i];
+      if (item % monkey.test_div === 0) {
         monkeys[monkey.test_true].items.push(item);
       } else {
         monkeys[monkey.test_false].items.push(item);
@@ -65,7 +73,7 @@ for (let i = 0; i < 20; i++) {
 const monkeyInspections = monkeys
   .map((m) => m.inspections)
   .slice()
-  .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
+  .sort((a, b) => b - a);
 
 const topInspections = monkeyInspections.slice(0, 2);
 const monkeyBusiness = topInspections[0] * topInspections[1];
@@ -74,18 +82,16 @@ console.log("part 1:", monkeyBusiness);
 
 const monkeys2 = getInitialMonkeys();
 
-// for (let i = 0; i < 1000; i++) {
-//   completeRound(monkeys2, false);
-//   console.log(i);
-// }
+for (let i = 0; i < 10000; i++) {
+  completeRound(monkeys2, false);
+}
 
-// // console.log(monkeys2);
+const monkeyInspections2 = monkeys2
+  .map((m) => m.inspections)
+  .slice()
+  .sort((a, b) => b - a);
 
-// const monkeyInspections2 = monkeys2
-//   .map((m) => m.inspections)
-//   .slice()
-//   .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
+const topInspections2 = monkeyInspections2.slice(0, 2);
+const monkeyBusiness2 = topInspections2[0] * topInspections2[1];
 
-// console.log(monkeyInspections2);
-
-// console.log("part 2:", part2);
+console.log("part 2:", monkeyBusiness2);
